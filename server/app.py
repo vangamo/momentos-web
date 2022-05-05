@@ -1,6 +1,31 @@
 from flask import Flask, request, send_file
 from flask_restful import Api, Resource
 from flask_cors import CORS
+import sqlite3
+
+con = sqlite3.connect('./data/moments.db')
+cur = con.cursor()
+try:
+  cur.execute('SELECT id, name, start, end, type, categories FROM moments')
+  allMoments = cur.fetchall()
+  print(allMoments)
+except:
+  try:
+    cur.execute('''DROP TABLE moments''')
+    con.commit()
+  except:
+    pass
+
+  cur.execute('''CREATE TABLE moments (
+                   id INTEGER AUTO_INCREMENT PRIMARY KEY,
+                   name TEXT NOT NULL,
+                   start TEXT NOT NULL,
+                   end TEXT,
+                   type TEXT,
+                   categories TEXT)''')
+  con.commit()
+con.close()
+
 
 # FLASK_ENV=development bin/flask run --debugger
 
@@ -10,16 +35,29 @@ api = Api(app)
 
 class Moment(Resource):
   def get(self, id:int=None):
+    con = sqlite3.connect('./data/moments.db')
     print(id)
     
     if id is not None:
       return id, 200
     
     else:
-      return {"error": True, "message": "Site not found"}, 404
+      cur = con.cursor()
+      cur.execute("select * from moments")
+      allMoments = [ {"id": m[0], "name": m[1], "start": m[2], "cat": [] if m[5] is None else m[5] } for m in cur.fetchall() ]
+      # allMoments = cur.fetchall()
+      print(allMoments)
+      return allMoments, 200
 
-  def post(self, id=0):
-    return 'Site not created', 404
+  def post(self):
+    con = sqlite3.connect('./data/moments.db')
+    cur = con.cursor()
+    cur.execute('''INSERT INTO moments (name, start, categories) VALUES(:name,:date, :cat)''', request.json )
+    request.json['id'] = cur.lastrowid
+    con.commit()
+    con.close()
+    
+    return request.json, 200
 
   def put(self, id=0):
     return 'Site not updated', 404
