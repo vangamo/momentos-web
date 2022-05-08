@@ -87,7 +87,7 @@ function ExpensesAdd(props) {
         <button onClick={handleClickNewExpense}>Nuevo</button>
       </form>
 
-    <Link to='list'>Volver</Link>
+    <Link to='..'>Volver</Link>
 
   </div>);
 }
