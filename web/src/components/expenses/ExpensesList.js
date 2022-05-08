@@ -35,7 +35,7 @@ function ExpensesList(props) {
 
     <ul>
         {expenses.map((exp, idx) => (
-          <li key={idx}>{exp.concept} - {exp.amount} <button data-expense={exp.id} data-idx={idx} onClick={handleClickDeleteExpense}>Borrar</button></li>
+          <li key={idx}>{exp.concept} - {exp.amount} <Link to={`edit/${exp.id}`}><button>Editar</button></Link> <button data-expense={exp.id} data-idx={idx} onClick={handleClickDeleteExpense}>Borrar</button></li>
         ))}
       </ul>
     <Link to='add'>Añadir</Link>

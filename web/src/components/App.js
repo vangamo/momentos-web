@@ -7,6 +7,7 @@ import MomentList from './moments/MomentsList';
 import Dashboard from './Dashboard';
 import ExpensesAdd from './expenses/ExpensesAdd';
 import ExpensesList from './expenses/ExpensesList';
+import ExpensesEdit from './expenses/ExpensesEdit';
 
 function App() {
   const [moments, setMoments] = useState([]);
@@ -74,6 +75,7 @@ function App() {
             <Route index element={<ExpensesList />} />
             <Route path="list" element={<ExpensesList />} />
             <Route path="add" element={<ExpensesAdd />} />
+            <Route path="edit/:id" element={<ExpensesEdit />} />
             <Route path="tickets" element={<ExpensesTickets />} />
           </Route>
         </Routes>

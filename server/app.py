@@ -100,7 +100,13 @@ class Expense(Resource):
     con = sqlite3.connect('./data/moments.db')
     
     if id is not None:
-      return id, 200
+      cur = con.cursor()
+      cur.execute("select id, concept, amount, date, timestamp, category, ref, account FROM expenses WHERE id=?", [id])
+      e = cur.fetchone()
+      expenseData = {"id": e[0], "concept": e[1], "amount": e[2], "date": e[3], "timestamp": e[4], "category": e[5], "ref": e[6], "account": e[7]}
+      
+      print(expenseData)
+      return expenseData, 200
     
     else:
       cur = con.cursor()
@@ -130,7 +136,26 @@ class Expense(Resource):
     return request.json, 200
 
   def put(self, id=0):
-    return 'Site not updated', 404
+    if id < 1:
+      return {'result': 'not_found'}, 404
+
+    con = sqlite3.connect('./data/moments.db')
+    cur = con.cursor()
+    
+    request.json['id'] = id
+    request.json['ref'] = request.json['ref'] if 'ref' in request.json else None
+
+    print( request.json )
+    cur.execute(''' UPDATE expenses SET concept=:concept, amount=:amount, date=:date, timestamp=:timestamp, category=:category, ref=:ref, account=:account WHERE id=:id LIMIT 1 ''', request.json )
+    con.commit()
+    con.close()
+
+    if cur.rowcount == 1:
+      return {'result': 'OK'}, 200
+    elif cur.rowcount == 0:
+      return {'result': 'not_found'}, 404
+    else:
+      return {'result': 'wrong_rowcount_'+str(cur.rowcount)}, 500
 
   def delete(self, id=0):
     con = sqlite3.connect('./data/moments.db')
