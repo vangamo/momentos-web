@@ -5,6 +5,7 @@ import sqlite3
 
 from datetime import timezone
 import datetime
+import json
 
 con = sqlite3.connect('./data/moments.db')
 cur = con.cursor()
@@ -185,6 +186,28 @@ def get_expense_categories():
   
   print(allCategories)
   return {'results': allCategories}, 200
+
+@app.route('/api/export', methods=['GET'])
+def export():
+  con = sqlite3.connect('./data/moments.db')
+  cur = con.cursor()
+  cur.execute("select id, concept, amount, date, timestamp, category, ref, account from expenses")
+  allExpenses = [ {"id": e[0], "concept": e[1], "amount": e[2], "date": e[3], "timestamp": e[4], "category": e[5], "ref": e[6], "account": e[7]} for e in cur.fetchall() ]
+  print(allExpenses)
+
+  cur.execute("select * from moments")
+  allMoments = [ {"id": m[0], "name": m[1], "start": m[2], "cat": [] if m[5] is None else m[5] } for m in cur.fetchall() ]
+  # allMoments = cur.fetchall()
+  print(allMoments)
+
+  with open('./tmp/export.json', 'w', encoding='utf8') as file:
+    file.write( json.dumps({"moments":allMoments, "expenses": allExpenses}, sort_keys=True, indent=2) )
+
+  return send_file(
+    './tmp/export.json',
+    mimetype='application/json',
+    as_attachment=True,
+    attachment_filename='export.json')
 
 
 @app.route('/api/moment/<mmt_id>/contact/<contact_id>/')

@@ -65,6 +65,9 @@ function App() {
           <li>
             <NavLink to="expenses">Compras</NavLink> (<NavLink to="expenses/tickets">Tickets</NavLink> - Recurrentes - Cuentas)
           </li>
+          <li>
+            Tools (<a href="//127.0.0.1:5000/api/export">Export</a> - Import)
+          </li>
         </ul>
       </nav>
       <main>
