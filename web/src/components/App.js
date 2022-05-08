@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, NavLink } from 'react-router-dom';
-import ExpensesList from './expenses/ExpensesList';
+import Expenses from './expenses/Expenses';
 import '../styles/App.scss';
 import ExpensesTickets from './expenses/ExpensesTickets';
-import Expenses from './expenses/Expenses';
 import MomentList from './moments/MomentsList';
 import Dashboard from './Dashboard';
+import ExpensesAdd from './expenses/ExpensesAdd';
 
 function App() {
   const [moments, setMoments] = useState([]);
@@ -71,8 +71,9 @@ function App() {
           <Route path="moments" element={<MomentList moments={moments} createNewMoment={createNewMoment}></MomentList>}>
           </Route>
           <Route path="expenses" element={<Expenses></Expenses>}>
+            <Route path="add" element={<ExpensesAdd></ExpensesAdd>}></Route>
             <Route path="tickets" element={<ExpensesTickets></ExpensesTickets>}></Route>
-            <Route path="*" element={<ExpensesList moments={moments}></ExpensesList>}></Route>
+            {/* <Route path="*" element={<Expenses moments={moments}></ExpensesList>}></Route> */}
           </Route>
         </Routes>
       </main>

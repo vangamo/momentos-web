@@ -3,6 +3,9 @@ from flask_restful import Api, Resource
 from flask_cors import CORS
 import sqlite3
 
+from datetime import timezone
+import datetime
+
 con = sqlite3.connect('./data/moments.db')
 cur = con.cursor()
 try:
@@ -17,12 +20,37 @@ except:
     pass
 
   cur.execute('''CREATE TABLE moments (
-                   id INTEGER AUTO_INCREMENT PRIMARY KEY,
+                   "id"	INTEGER NOT NULL,
                    name TEXT NOT NULL,
                    start TEXT NOT NULL,
                    end TEXT,
                    type TEXT,
-                   categories TEXT)''')
+                   categories TEXT,
+	                 PRIMARY KEY("id" AUTOINCREMENT) )''')
+  con.commit()
+
+try:
+  cur.execute('SELECT id, concept, amount, date, timestamp, category, ref, account FROM expenses')
+  allMoments = cur.fetchall()
+  print(allMoments)
+except:
+  try:
+    cur.execute('''DROP TABLE expenses''')
+    con.commit()
+  except:
+    pass
+
+  cur.execute('''CREATE TABLE expenses (
+                   "id"	INTEGER NOT NULL,
+                   concept TEXT NOT NULL,
+                   amount REAL NOT NULL,
+                   date TEXT NOT NULL,
+                   timestamp INTEGER NOT NULL,
+                   category TEXT,
+                   ref TEXT,
+                   account TEXT,
+	                 PRIMARY KEY("id" AUTOINCREMENT) )''')
+  #                origin? ticket_image? items[]?
   con.commit()
 con.close()
 
@@ -66,6 +94,73 @@ class Moment(Resource):
     return 'Site not deleted', 404
 
 api.add_resource(Moment, "/api/moments/", "/api/moment/", "/api/moment/<int:id>")
+
+class Expense(Resource):
+  def get(self, id:int=None):
+    con = sqlite3.connect('./data/moments.db')
+    
+    if id is not None:
+      return id, 200
+    
+    else:
+      cur = con.cursor()
+      cur.execute("select id, concept, amount, date, timestamp, category, ref, account from expenses")
+      allExpenses = [ {"id": e[0], "concept": e[1], "amount": e[2], "date": e[3], "timestamp": e[4], "category": e[5], "ref": e[6], "account": e[7]} for e in cur.fetchall() ]
+      
+      print(allExpenses)
+      return allExpenses, 200
+
+  def post(self):
+    con = sqlite3.connect('./data/moments.db')
+    cur = con.cursor()
+    dt = datetime.datetime.now(timezone.utc)
+      
+    utc_time = dt.replace(tzinfo=timezone.utc)
+    utc_timestamp = utc_time.timestamp()
+
+    request.json['timestamp'] = utc_timestamp
+    request.json['ref'] = request.json['ref'] if 'ref' in request.json else None
+
+    print( request.json )
+    cur.execute('''INSERT INTO expenses (concept, amount, date, timestamp, category, ref, account) VALUES (:concept, :amount, :date, :timestamp, :category, :ref, :account)''', request.json )
+    request.json['id'] = cur.lastrowid
+    con.commit()
+    con.close()
+
+    return request.json, 200
+
+  def put(self, id=0):
+    return 'Site not updated', 404
+
+  def delete(self, id=0):
+    con = sqlite3.connect('./data/moments.db')
+    cur = con.cursor()
+
+    if id < 1:
+      return {'result': 'not_found'}, 404
+
+    cur.execute('''DELETE FROM expenses WHERE id=? LIMIT 1''', [id] )
+    con.commit()
+    con.close()
+    if cur.rowcount == 1:
+      return {'result': 'OK'}, 200
+    elif cur.rowcount == 0:
+      return {'result': 'not_found'}, 404
+    else:
+      return {'result': 'wrong_rowcount_'+str(cur.rowcount)}, 500
+
+api.add_resource(Expense, "/api/expenses/", "/api/expense/", "/api/expense/<int:id>")
+
+@app.route('/api/expenses/categories', methods=['GET'])
+def get_expense_categories():
+  con = sqlite3.connect('./data/moments.db')
+  cur = con.cursor()
+  cur.execute("SELECT category, COUNT(*) AS counter FROM expenses GROUP BY category ORDER BY counter DESC")
+  allCategories = [ {"category": c[0], "count": c[1]} for c in cur.fetchall() ]
+  
+  print(allCategories)
+  return {'results': allCategories}, 200
+
 
 @app.route('/api/moment/<mmt_id>/contact/<contact_id>/')
 def get_example(mmt_id=None, contact_id=None):
