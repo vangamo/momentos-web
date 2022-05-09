@@ -21,9 +21,6 @@ source bin/activate
 
 # deactivate
 deactivate
-
-# docker run --name momentos-postgres -p 5432:5432 -e POSTGRES_USER=momentos -e POSTGRES_PASSWORD=mysecretpassword -d postgres
-# docker container start momentos-postgres
 ```
 
 ## Docker
