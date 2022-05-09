@@ -1,4 +1,6 @@
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
 :root {
@@ -27,5 +29,55 @@ body {
     padding: 0;
     margin: 0 auto;
     width: 80%;
+  }
+}
+
+.mainMenu {
+  .menu {
+    &__list {
+      min-height: 3em;
+      list-style-type: none;
+      display: flex;
+      justify-content: space-evenly;
+      @media (min-width: 768px) {
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
+    &__item {
+      display: block;
+      height: 1.5em;
+      line-height: 1.5em;
+
+      &.active .submenu__list,
+      &:hover .submenu__list {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        list-style-type: none;
+        display: flex;
+        justify-content: space-evenly;
+      }
+
+      &:hover .submenu__list {
+        z-index: 1;
+        background-color: white;
+      }
+      .submenu__list {
+        display: none;
+        min-height: 1.5em;
+      }
+    }
+
+    &__link {
+      color: darkblue;
+    }
+
+    &__link.active {
+      text-decoration: none;
+      font-weight: 600;
+    }
   }
 }
