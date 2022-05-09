@@ -1,6 +1,7 @@
 # Custom
 
 concepts/
+server/data/*.db
 server/data/screenshots
 server/data/tmp
 .fuse_hidden*

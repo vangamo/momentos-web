@@ -200,11 +200,11 @@ def export():
   # allMoments = cur.fetchall()
   print(allMoments)
 
-  with open('./tmp/export.json', 'w', encoding='utf8') as file:
+  with open('./data/tmp/export.json', 'w', encoding='utf8') as file:
     file.write( json.dumps({"moments":allMoments, "expenses": allExpenses}, sort_keys=True, indent=2) )
 
   return send_file(
-    './tmp/export.json',
+    './data/tmp/export.json',
     mimetype='application/json',
     as_attachment=True,
     attachment_filename='export.json')

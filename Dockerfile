@@ -13,7 +13,6 @@ WORKDIR /app
 
 COPY server/requirements.txt server/app.py ./
 ADD server/data/* ./data/
-ADD server/tmp/* ./tmp/
 COPY --from=build-step /app/build ./static_react
 RUN ls -lh
 RUN pip install -r ./requirements.txt
