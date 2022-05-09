@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
+import '../../styles/Form.scss';
 
 const { NODE_ENV } = process.env;
 const HOST_API = 'production' === NODE_ENV ? '' : 'http://127.0.0.1:5000';
@@ -36,37 +37,44 @@ function ExpensesAdd(props) {
   }
 
   return (
-  <div>
+  <section>
     Nuevo gasto
 
-      <form action='' onSubmit={(ev) => ev.preventDefault()}>
-      
+      <form className="inputData" onSubmit={(ev) => ev.preventDefault()}>
+        <label htmlFor="concept" className="inputData__label">Concepto:</label>
         <input
           type='text'
+          className="inputData__textField"
           name='concept'
           id='concept'
           placeholder='Concepto'
           value={newExpense.concept}
           onChange={handleChangeNewExpense}
         />
+        <label htmlFor="amount" className="inputData__label">Cantidad:</label>
         <input
           type='text'
+          className="inputData__textField"
           name='amount'
           id='amount'
           placeholder='Cantidad'
           value={newExpense.amount}
           onChange={handleChangeNewExpense}
         />
+        <label htmlFor="date" className="inputData__label">Fecha:</label>
         <input
           type='text'
+          className="inputData__textField"
           name='date'
           id='date'
           placeholder='Fecha/Hora'
           value={newExpense.date}
           onChange={handleChangeNewExpense}
         />
+        <label htmlFor="category" className="inputData__label">Categoría:</label>
         <input
           type='text'
+          className="inputData__textField"
           name='category'
           id='category'
           placeholder='Categoría'
@@ -79,20 +87,30 @@ function ExpensesAdd(props) {
           <option value={cat}/>
           )}
         </datalist>
+        <label htmlFor="account" className="inputData__label">Cuenta:</label>
         <input
           type='text'
+          className="inputData__textField"
           name='account'
           id='account'
           placeholder='Cuenta'
           value={newExpense.account}
           onChange={handleChangeNewExpense}
         />
-        <button onClick={handleClickNewExpense}>Nuevo</button>
+        <input type="file" accept="image/*" capture="camera" class="inputData__fileField"></input>
+
+        <fieldset class="inputData__controls">
+          <Link to='..'>
+            <button type="reset" className="button">
+              Atrás
+            </button>
+          </Link>
+          <button type="submit" className="button" onClick={handleClickNewExpense}>
+            Crear
+          </button>
+        </fieldset>
       </form>
-
-    <Link to='..'>Volver</Link>
-
-  </div>);
+  </section>);
 }
 
 export default ExpensesAdd;

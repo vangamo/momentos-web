@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
+import "../../styles/Table.scss";
 
 const { NODE_ENV } = process.env;
 const HOST_API = 'production' === NODE_ENV ? '' : 'http://127.0.0.1:5000';

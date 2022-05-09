@@ -50,8 +50,8 @@ function App() {
   
   return (
     <div className="App">
-      <header>
-        <h1>Momentos</h1>
+      <header className="App__header">
+        <h1 className="App__title">Momentos</h1>
         
       </header>
       <nav>
@@ -73,7 +73,7 @@ function App() {
           </li>
         </ul>
       </nav>
-      <main>
+      <main className="App__main">
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/moments" element={<MomentList moments={moments} createNewMoment={createNewMoment} />} />
