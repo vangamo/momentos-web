@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
 
+const { NODE_ENV } = process.env;
+const HOST_API = 'production' === NODE_ENV ? '' : 'http://127.0.0.1:5000';
+
 function ExpensesList(props) {
   const [expenses, setExpenses] = useState([]);
 
   useEffect( () => {
 
-    fetch('http://127.0.0.1:5000/api/expenses/')
+    fetch(`${HOST_API}/api/expenses/`)
       .then( response => response.json() )
       .then( data => {
         setExpenses(data);
@@ -19,7 +22,7 @@ function ExpensesList(props) {
     console.log(ev.target.dataset['expense']);
     const expenseId = parseInt(ev.target.dataset['expense']);
 
-    fetch(`http://127.0.0.1:5000/api/expense/${expenseId}`,{method:'DELETE'})
+    fetch(`${HOST_API}/api/expense/${expenseId}`,{method:'DELETE'})
       .then( response => response.json() )
       .then( data => {
         if( data.result === 'OK' ) {

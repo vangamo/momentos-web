@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from "react-router-dom";
 
+const { NODE_ENV } = process.env;
+const HOST_API = 'production' === NODE_ENV ? '' : 'http://127.0.0.1:5000';
+
 function ExpensesEdit(props) {
   const [categories, setCategories ] = useState([]);
   const [expenseData, setExpenseData] = useState({concept: '', amount: 0, date: (new Date()).toISOString(), category: '', account: ''})
@@ -10,13 +13,13 @@ function ExpensesEdit(props) {
 
   useEffect( () => {
 
-    fetch(`http://127.0.0.1:5000/api/expense/${params.id}`)
+    fetch(`${HOST_API}/api/expense/${params.id}`)
     .then( response => response.json() )
     .then( data => {
       setExpenseData(data);
     });
 
-    fetch('http://127.0.0.1:5000/api/expenses/categories')
+    fetch(`${HOST_API}/api/expenses/categories`)
       .then( response => response.json() )
       .then( data => {
         setCategories(data.results.map(catObj => catObj.category));
@@ -33,7 +36,7 @@ function ExpensesEdit(props) {
   }
 
   const createNewExpense = (expenseData) => {
-    return fetch(`http://127.0.0.1:5000/api/expense/${params.id}`, {method:'PUT', headers:{'Content-Type': 'application/json'}, body: JSON.stringify(expenseData)})
+    return fetch(`${HOST_API}/api/expense/${params.id}`, {method:'PUT', headers:{'Content-Type': 'application/json'}, body: JSON.stringify(expenseData)})
     .then(response => response.json())
     .then( data => {
       navigateTo('..');

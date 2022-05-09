@@ -9,13 +9,16 @@ import ExpensesAdd from './expenses/ExpensesAdd';
 import ExpensesList from './expenses/ExpensesList';
 import ExpensesEdit from './expenses/ExpensesEdit';
 
+const { NODE_ENV } = process.env;
+const HOST_API = 'production' === NODE_ENV ? '' : 'http://127.0.0.1:5000';
+
 function App() {
   const [moments, setMoments] = useState([]);
   const [newMmt, setNewMmt] = useState({name: '', date: (new Date()).toISOString(), cat:''})
 
   useEffect( () => {
 
-    fetch('http://127.0.0.1:5000/api/moments/')
+    fetch(`${HOST_API}/api/moments/`)
       .then( response => response.json() )
       .then( data => {
         setMoments(data);
@@ -28,7 +31,7 @@ function App() {
   }
 
   const createNewMoment = (mmtData) => {
-    return fetch('http://127.0.0.1:5000/api/moments/', {method:'POST', headers:{'Content-Type': 'application/json'}, body: JSON.stringify(newMmt)})
+    return fetch(`${HOST_API}/api/moments/`, {method:'POST', headers:{'Content-Type': 'application/json'}, body: JSON.stringify(newMmt)})
     .then(response => response.json())
     .then( data => {
       setMoments([...moments, data]);
@@ -66,7 +69,7 @@ function App() {
             <NavLink to="expenses">Compras</NavLink> (<NavLink to="expenses/tickets">Tickets</NavLink> - Recurrentes - Cuentas)
           </li>
           <li>
-            Tools (<a href="//127.0.0.1:5000/api/export">Export</a> - Import)
+            Tools (<a href={`${HOST_API}/api/export`}>Export</a> - Import)
           </li>
         </ul>
       </nav>
