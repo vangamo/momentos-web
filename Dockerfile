@@ -25,3 +25,4 @@ CMD ["gunicorn", "-b", ":8000", "app:app"]
 
 # Build: docker build -f Dockerfile -t momentos-web .
 # Test:  docker run --rm -p 8000:8000 momentos-web  
+# Persistent:  docker run -p 8000:8000 --mount type=bind,source="$(pwd -P)"/server/data,target=/app/data momentos-web
