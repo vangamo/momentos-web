@@ -26,6 +26,11 @@ deactivate
 # docker container start momentos-postgres
 ```
 
+## Docker
+
+- <https://blog.miguelgrinberg.com/post/how-to-dockerize-a-react-flask-project>
+- <https://medium.com/swlh/deploy-and-secure-a-react-flask-app-with-docker-and-nginx-768ca582863b>
+
 ## TODO: PostgreSQL
 
 - <https://hub.docker.com/_/postgres/>
