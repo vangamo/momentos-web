@@ -22,7 +22,7 @@ function ExpensesTickets() {
   }, [listDocuments, paperlessApiStatus]);
 
   return (
-    <p>
+    <section>
       Tickets!
       <ul>
         {documents.map((doc) => (
@@ -32,7 +32,7 @@ function ExpensesTickets() {
           </li>
         ))}
       </ul>
-    </p>
+    </section>
   );
 }
 
