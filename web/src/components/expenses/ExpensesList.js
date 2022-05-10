@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link } from "react-router-dom";
-import "../../styles/Table.scss";
+import { Link } from 'react-router-dom';
+import '../../styles/Table.scss';
 
 const { NODE_ENV } = process.env;
 const HOST_API = 'production' === NODE_ENV ? '' : 'http://127.0.0.1:5000';
@@ -8,14 +8,12 @@ const HOST_API = 'production' === NODE_ENV ? '' : 'http://127.0.0.1:5000';
 function ExpensesList(props) {
   const [expenses, setExpenses] = useState([]);
 
-  useEffect( () => {
-
+  useEffect(() => {
     fetch(`${HOST_API}/api/expenses/`)
-      .then( response => response.json() )
-      .then( data => {
+      .then((response) => response.json())
+      .then((data) => {
         setExpenses(data);
       });
-
   }, []);
 
   const handleClickDeleteExpense = (ev) => {
@@ -23,28 +21,52 @@ function ExpensesList(props) {
     console.log(ev.target.dataset['expense']);
     const expenseId = parseInt(ev.target.dataset['expense']);
 
-    fetch(`${HOST_API}/api/expense/${expenseId}`,{method:'DELETE'})
-      .then( response => response.json() )
-      .then( data => {
-        if( data.result === 'OK' ) {
-          setExpenses(expenses.filter(e=>e.id !== expenseId));
+    fetch(`${HOST_API}/api/expense/${expenseId}`, { method: 'DELETE' })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.result === 'OK') {
+          setExpenses(expenses.filter((e) => e.id !== expenseId));
         }
       });
-  
-  }
+  };
 
   return (
-  <p>
-    No sé
+    <section>
+      No sé
+      <Table expenses={expenses} handleClickDeleteExpense={handleClickDeleteExpense}></Table>
+      <Link to="add">Añadir</Link>
+    </section>
+  );
+}
 
-    <ul>
-        {expenses.map((exp, idx) => (
-          <li key={idx}>{exp.concept} - {exp.amount} <Link to={`edit/${exp.id}`}><button>Editar</button></Link> <button data-expense={exp.id} data-idx={idx} onClick={handleClickDeleteExpense}>Borrar</button></li>
+function Table(props) {
+  return (
+    <table>
+      <thead>
+        <tr>
+          <th>Concepto</th>
+          <th>Cantidad</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {props.expenses.map((exp, idx) => (
+          <tr key={idx}>
+            <td>{exp.concept}</td>
+            <td>{exp.amount}</td>
+            <td>
+              <Link to={`edit/${exp.id}`}>
+                <button>Editar</button>
+              </Link>{' '}
+              <button data-expense={exp.id} data-idx={idx} onClick={props.handleClickDeleteExpense}>
+                Borrar
+              </button>
+            </td>
+          </tr>
         ))}
-      </ul>
-    <Link to='add'>Añadir</Link>
-
-  </p>);
+      </tbody>
+    </table>
+  );
 }
 
 export default ExpensesList;
