@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from "react-router-dom";
 import '../../styles/Form.scss';
 
@@ -9,6 +9,7 @@ function ExpensesAdd(props) {
   const [categories, setCategories ] = useState([]);
   const [newExpense, setNewExpense] = useState({concept: '', amount: 0, date: (new Date()).toISOString(), category: '', account: ''})
 
+  const firstInput = useRef(null);
 
   useEffect( () => {
 
@@ -17,6 +18,9 @@ function ExpensesAdd(props) {
       .then( data => {
         setCategories(data.results.map(catObj => catObj.category));
       });
+
+    firstInput.current.focus();
+    firstInput.current.scrollIntoView();
 
   }, []);
 
@@ -29,6 +33,9 @@ function ExpensesAdd(props) {
   }
 
   const createNewExpense = (expenseData) => {
+    expenseData.date = expenseData.date + ':00+02:00';
+    expenseData.amount = expenseData.amount.replace(',', '.');
+
     return fetch(`${HOST_API}/api/expenses/`, {method:'POST', headers:{'Content-Type': 'application/json'}, body: JSON.stringify(expenseData)})
     .then(response => response.json())
     .then( data => {
@@ -48,29 +55,37 @@ function ExpensesAdd(props) {
           name='concept'
           id='concept'
           placeholder='Concepto'
+          ref={firstInput}
+          autofocus={true}
+          tabIndex={1}
           value={newExpense.concept}
           onChange={handleChangeNewExpense}
         />
-        <label htmlFor="amount" className="inputData__label">Cantidad:</label>
+        <label htmlFor="amount" className="inputData__label">Importe:</label>
         <input
           type='text'
           className="inputData__textField"
           name='amount'
           id='amount'
-          placeholder='Cantidad'
+          placeholder='En euros'
+          inputMode='numeric'
+          tabIndex={2}
           value={newExpense.amount}
           onChange={handleChangeNewExpense}
         />
         <label htmlFor="date" className="inputData__label">Fecha:</label>
+        {/*navigator.userAgent.includes('Android') ? 'datetime-local' : 'text' */}
         <input
-          type='text'
+          type='datetime-local'
           className="inputData__textField"
           name='date'
           id='date'
           placeholder='Fecha/Hora'
+          tabIndex={3}
           value={newExpense.date}
           onChange={handleChangeNewExpense}
         />
+        value={newExpense.date}
         <label htmlFor="category" className="inputData__label">Categoría:</label>
         <input
           type='text'
@@ -78,13 +93,14 @@ function ExpensesAdd(props) {
           name='category'
           id='category'
           placeholder='Categoría'
+          tabIndex={4}
           list="categories_of_expenses"
           value={newExpense.category}
           onChange={handleChangeNewExpense}
         />
         <datalist id="categories_of_expenses">
           {categories.map((cat, idx) => 
-          <option value={cat}/>
+          <option key={idx} value={cat}/>
           )}
         </datalist>
         <label htmlFor="account" className="inputData__label">Cuenta:</label>
@@ -94,6 +110,7 @@ function ExpensesAdd(props) {
           name='account'
           id='account'
           placeholder='Cuenta'
+          tabIndex={5}
           value={newExpense.account}
           onChange={handleChangeNewExpense}
         />
