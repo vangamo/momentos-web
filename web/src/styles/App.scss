@@ -5,7 +5,10 @@
 }
 :root {
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  font-size: 20px;
+  font-size: 24px;
+  @media (min-width: 768px) {
+    font-size: 20px;
+  }
 }
 body {
   margin: 0;
@@ -13,14 +16,13 @@ body {
 }
 
 .App__header {
-  height: 5em;
+  height: 4rem;
   text-align: center;
   background-color: darkblue;
   color: white;
 }
 .App__title {
-  margin: 0;
-  padding: 0.5em 0;
+  line-height: 4rem;
 }
 .App__main {
   padding: 20px;
@@ -35,10 +37,13 @@ body {
 .mainMenu {
   .menu {
     &__list {
-      min-height: 3em;
+      /* min-height: 3em; */
+      min-height: 1.5em;
+      margin-bottom: 1.5em;
       list-style-type: none;
       display: flex;
       justify-content: space-evenly;
+      flex-wrap: wrap;
       @media (min-width: 768px) {
         max-width: 600px;
         margin-left: auto;
