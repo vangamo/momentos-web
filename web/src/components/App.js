@@ -10,7 +10,7 @@ import ExpensesList from './expenses/ExpensesList';
 import ExpensesEdit from './expenses/ExpensesEdit';
 
 const { NODE_ENV } = process.env;
-const HOST_API = 'production' === NODE_ENV ? '' : 'http://127.0.0.1:5000';
+const HOST_API = 'production' === NODE_ENV ? '' : `${window.location.protocol}//${window.location.hostname}:5000`;
 
 function App() {
   const [moments, setMoments] = useState([]);

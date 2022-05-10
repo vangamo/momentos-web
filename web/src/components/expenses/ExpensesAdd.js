@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import '../../styles/Form.scss';
 
 const { NODE_ENV } = process.env;
-const HOST_API = 'production' === NODE_ENV ? '' : 'http://127.0.0.1:5000';
+const HOST_API = 'production' === NODE_ENV ? '' : `${window.location.protocol}//${window.location.hostname}:5000`;
 
 function ExpensesAdd(props) {
   const [categories, setCategories ] = useState([]);
