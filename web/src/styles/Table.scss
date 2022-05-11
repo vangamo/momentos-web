@@ -1,6 +1,11 @@
 .gastosTable {
-  padding: 2em;
+  padding: 0em;
   width: 100%;
+  border-spacing: 0;
+  line-height: 2em;
+  @media (min-width: 768px) {
+    padding: 2em;
+  }
 }
 
 .gastosTable .gastosTable__head-row {
@@ -9,6 +14,27 @@
   font-weight: bold;
 }
 
+.gastosTable .gastosTable__rowgroup {
+  padding-top: 0.25em;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
 .gastosTable .gastosTable__row:nth-child( 2n ) {
-  background-color: lightgray;
+  background-color: #e3e3e3;
+}
+
+.gastosTable tbody tr:last-child td {
+  border-bottom: solid 1px darkblue;
+}
+
+.gastosTable td, .gastosTable th {
+  display: none;
+  &.imp,
+  &.gastosTable__rowgroup {
+    display: table-cell;
+  }
+  @media (min-width: 768px), (orientation: landscape) {
+    display: table-cell;
+  }
 }
