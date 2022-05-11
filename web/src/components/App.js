@@ -14,10 +14,9 @@ const HOST_API = 'production' === NODE_ENV ? '' : `${window.location.protocol}//
 
 function App() {
   const [moments, setMoments] = useState([]);
-  const [newMmt, setNewMmt] = useState({name: '', date: (new Date()).toISOString(), cat:''})
+  const [newMmt, setNewMmt] = useState({name: '', date: '', cat:''})
 
   const location = useLocation();
-  console.dir(location);
 
   useEffect( () => {
 

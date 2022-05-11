@@ -5,6 +5,17 @@ import '../../styles/Table.scss';
 const { NODE_ENV } = process.env;
 const HOST_API = 'production' === NODE_ENV ? '' : `${window.location.protocol}//${window.location.hostname}:5000`;
 
+const isoToHuman = (date) => {
+  const MONTHS = ['','ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const regExp = new RegExp(/([0-9]{2,4})-([0-9]{1,2})-([0-9]{1,2})(T([0-9]{1,2}):([0-9]{1,2}):?([0-9]{0,2})?)/);
+  const dateValues = regExp.exec(date);
+  if(!dateValues) {
+    console.error(date);
+    return '?';
+  }
+  return `${dateValues[3]}${MONTHS[parseInt(dateValues[2],10)]} ${dateValues[5]}:${dateValues[6]}`;
+}
+
 function ExpensesList(props) {
   const [expenses, setExpenses] = useState([]);
 
@@ -18,7 +29,7 @@ function ExpensesList(props) {
 
   const handleClickDeleteExpense = (ev) => {
     ev.preventDefault();
-    console.log(ev.target.dataset['expense']);
+
     const expenseId = parseInt(ev.target.dataset['expense']);
 
     fetch(`${HOST_API}/api/expense/${expenseId}`, { method: 'DELETE' })
@@ -44,6 +55,7 @@ function Table(props) {
     <table>
       <thead>
         <tr>
+          <th>Fecha</th>
           <th>Concepto</th>
           <th>Cantidad</th>
           <th></th>
@@ -52,6 +64,7 @@ function Table(props) {
       <tbody>
         {props.expenses.map((exp, idx) => (
           <tr key={idx}>
+            <td>{isoToHuman(exp.date)}</td>
             <td>{exp.concept}</td>
             <td>{exp.amount}</td>
             <td>

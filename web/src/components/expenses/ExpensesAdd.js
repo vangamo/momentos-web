@@ -33,7 +33,34 @@ function ExpensesAdd(props) {
   }
 
   const createNewExpense = (expenseData) => {
-    expenseData.date = expenseData.date + ':00+02:00';
+    const VALID_FORMAT_DATES = [
+      new RegExp(/([0-9]{2,4})-([0-9]{1,2})-([0-9]{1,2})(T([0-9]{1,2}):([0-9]{1,2}):?([0-9]{0,2})?)/), // ISO
+      new RegExp(/([0-9]{2,4})\.([0-9]{1,2})\.([0-9]{1,2})([ -]([0-9]{1,2})[.:]([0-9]{1,2})[.:]?([0-9]{0,2})?)?/), // IGM
+      new RegExp(/([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{2,4})( ([0-9]{1,2}):([0-9]{1,2}):?([0-9]{0,2})?)?/) // ESP
+    ];
+    
+    const validFormat = VALID_FORMAT_DATES.find( format => format.test(expenseData.date) );
+    
+    if( validFormat ) {
+      const dateValues = validFormat.exec(expenseData.date);
+      if(expenseData.date.includes('/')) {
+        const swp = dateValues[3];
+        dateValues[3] = dateValues[1];
+        dateValues[1] = swp;
+      }
+      if( !dateValues[4] ) {
+        dateValues[5] = '00';
+        dateValues[6] = '00';
+      }
+      if( dateValues[1].length === 2 ) {
+        dateValues[1] = '20'+dateValues[1];
+      }
+      expenseData.date = `${dateValues[1]}-${dateValues[2].padStart(2, '0')}-${dateValues[3].padStart(2, '0')}T${dateValues[5].padStart(2, '0')}:${dateValues[6].padStart(2, '0')}:00+02:00`;
+    }
+    else {
+      console.error(`Date format error: "${expenseData.date}"`);
+      return;
+    }
     expenseData.amount = expenseData.amount.replace(',', '.');
 
     return fetch(`${HOST_API}/api/expenses/`, {method:'POST', headers:{'Content-Type': 'application/json'}, body: JSON.stringify(expenseData)})
@@ -74,9 +101,8 @@ function ExpensesAdd(props) {
           onChange={handleChangeNewExpense}
         />
         <label htmlFor="date" className="inputData__label">Fecha:</label>
-        {/*navigator.userAgent.includes('Android') ? 'datetime-local' : 'text' */}
         <input
-          type='datetime-local'
+          type={navigator.userAgent.includes('Android') ? 'datetime-local' : 'text'}
           className="inputData__textField"
           name='date'
           id='date'
@@ -85,7 +111,6 @@ function ExpensesAdd(props) {
           value={newExpense.date}
           onChange={handleChangeNewExpense}
         />
-        value={newExpense.date}
         <label htmlFor="category" className="inputData__label">Categoría:</label>
         <input
           type='text'
