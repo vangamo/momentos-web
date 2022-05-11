@@ -23,8 +23,6 @@ class Api {
   constructor(host, authToken) {
     this.host = host;
     this.__authToken__ = authToken;
-
-    console.log(host);
   }
 
   getDocuments() {
