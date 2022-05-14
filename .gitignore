@@ -4,4 +4,5 @@ concepts/
 server/data/*.db
 server/data/screenshots
 server/data/tmp
+server/docs
 .fuse_hidden*
