@@ -106,7 +106,6 @@ class Expense(Resource):
       e = cur.fetchone()
       expenseData = {"id": e[0], "concept": e[1], "amount": e[2], "date": e[3], "timestamp": e[4], "category": e[5], "ref": e[6], "account": e[7]}
       
-      print(expenseData)
       return expenseData, 200
     
     else:
@@ -114,7 +113,6 @@ class Expense(Resource):
       cur.execute("SELECT id, concept, amount, date, timestamp, category, ref, account FROM expenses ORDER BY date DESC")
       allExpenses = [ {"id": e[0], "concept": e[1], "amount": e[2], "date": e[3], "timestamp": e[4], "category": e[5], "ref": e[6], "account": e[7]} for e in cur.fetchall() ]
       
-      print(allExpenses)
       return allExpenses, 200
 
   def post(self):

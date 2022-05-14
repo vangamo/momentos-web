@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import '../../styles/Form.scss';
 
 const { NODE_ENV } = process.env;
@@ -10,6 +10,8 @@ function ExpensesAdd(props) {
   const [newExpense, setNewExpense] = useState({concept: '', amount: 0, date: (new Date()).toISOString(), category: '', account: ''})
 
   const firstInput = useRef(null);
+
+  const navigateTo = useNavigate();
 
   useEffect( () => {
 
@@ -30,6 +32,13 @@ function ExpensesAdd(props) {
 
   const handleClickNewExpense = () => {
     createNewExpense(newExpense);
+  }
+
+  const handleClickNewExpenseAndClose = () => {
+    createNewExpense(newExpense).then((data) => {
+      navigateTo('..');
+      return data;
+    });
   }
 
   const createNewExpense = (expenseData) => {
@@ -147,8 +156,11 @@ function ExpensesAdd(props) {
               Atrás
             </button>
           </Link>
+          <button type="submit" className="button" onClick={handleClickNewExpenseAndClose}>
+            Crear y cerrar
+          </button>
           <button type="submit" className="button" onClick={handleClickNewExpense}>
-            Crear
+            Crear y seguir
           </button>
         </fieldset>
       </form>

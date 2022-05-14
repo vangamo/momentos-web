@@ -1,55 +1,65 @@
 import { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import '../../styles/Form.scss';
 
 const { NODE_ENV } = process.env;
-const HOST_API = 'production' === NODE_ENV ? '' : `${window.location.protocol}//${window.location.hostname}:5000`;
+const HOST_API =
+  'production' === NODE_ENV
+    ? ''
+    : `${window.location.protocol}//${window.location.hostname}:5000`;
 
 function ExpensesEdit(props) {
-  const [categories, setCategories ] = useState([]);
-  const [expenseData, setExpenseData] = useState({concept: '', amount: 0, date: (new Date()).toISOString(), category: '', account: ''})
+  const [categories, setCategories] = useState([]);
+  const [expenseData, setExpenseData] = useState({
+    concept: '',
+    amount: 0,
+    date: new Date().toISOString(),
+    category: '',
+    account: '',
+  });
 
   const params = useParams();
   const navigateTo = useNavigate();
 
-  useEffect( () => {
-
+  useEffect(() => {
     fetch(`${HOST_API}/api/expense/${params.id}`)
-    .then( response => response.json() )
-    .then( data => {
-      setExpenseData(data);
-    });
-
-    fetch(`${HOST_API}/api/expenses/categories`)
-      .then( response => response.json() )
-      .then( data => {
-        setCategories(data.results.map(catObj => catObj.category));
+      .then((response) => response.json())
+      .then((data) => {
+        setExpenseData(data);
       });
 
+    fetch(`${HOST_API}/api/expenses/categories`)
+      .then((response) => response.json())
+      .then((data) => {
+        setCategories(data.results.map((catObj) => catObj.category));
+      });
   }, []);
 
   const handleChangeNewExpense = (ev) => {
-    setExpenseData( {...expenseData, [ev.target.id]: ev.target.value} );
-  }
+    setExpenseData({ ...expenseData, [ev.target.id]: ev.target.value });
+  };
 
   const handleClickNewExpense = () => {
     createNewExpense(expenseData);
-  }
+  };
 
   const createNewExpense = (expenseData) => {
-    return fetch(`${HOST_API}/api/expense/${params.id}`, {method:'PUT', headers:{'Content-Type': 'application/json'}, body: JSON.stringify(expenseData)})
-    .then(response => response.json())
-    .then( data => {
-      navigateTo('..');
-      return data;
-    });
-  }
+    return fetch(`${HOST_API}/api/expense/${params.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(expenseData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        navigateTo('..');
+        return data;
+      });
+  };
 
   return (
-  <div>
-    Editar gasto
-
-      <form action='' onSubmit={(ev) => ev.preventDefault()}>
-      
+    <div>
+      Editar gasto
+      <form className="inputData" onSubmit={(ev) => ev.preventDefault()}>
         <input
           type='text'
           name='concept'
@@ -79,14 +89,14 @@ function ExpensesEdit(props) {
           name='category'
           id='category'
           placeholder='Categoría'
-          list="categories_of_expenses"
+          list='categories_of_expenses'
           value={expenseData.category}
           onChange={handleChangeNewExpense}
         />
-        <datalist id="categories_of_expenses">
-          {categories.map((cat, idx) => 
-          <option value={cat}/>
-          )}
+        <datalist id='categories_of_expenses'>
+          {categories.map((cat, idx) => (
+            <option value={cat} />
+          ))}
         </datalist>
         <input
           type='text'
@@ -96,12 +106,18 @@ function ExpensesEdit(props) {
           value={expenseData.account}
           onChange={handleChangeNewExpense}
         />
-        <button onClick={handleClickNewExpense}>Nuevo</button>
+
+        <fieldset class='inputData__controls'>
+          <Link to='..'>
+            <button type='reset' className='button'>
+              Atrás
+            </button>
+          </Link>
+          <button onClick={handleClickNewExpense}>Guardar</button>
+        </fieldset>
       </form>
-
-    <Link to='..'>Volver</Link>
-
-  </div>);
+    </div>
+  );
 }
 
 export default ExpensesEdit;
