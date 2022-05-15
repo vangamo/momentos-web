@@ -96,6 +96,18 @@ class Moment(Resource):
 
 api.add_resource(Moment, "/api/moments/", "/api/moment/", "/api/moment/<int:id>")
 
+@app.route('/api/expense/<int:id>/origin', methods=['POST'])
+def post_expense_origin(id=0):
+  con = sqlite3.connect('./data/moments.db')
+  cur = con.cursor()
+
+  cur.execute(' ''INSERT INTO expense_origin (origin, data, expense_id) VALUES (:origin, :data, :expenseId)' '', request.json )
+  request.json['id'] = cur.lastrowid
+  con.commit()
+  con.close()
+
+  return request.json, 200
+
 class Expense(Resource):
   def get(self, id:int=None):
     con = sqlite3.connect('./data/moments.db')
