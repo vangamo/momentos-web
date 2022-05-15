@@ -109,9 +109,19 @@ class Expense(Resource):
       return expenseData, 200
     
     else:
+      print( request.args )
       cur = con.cursor()
-      cur.execute("SELECT id, concept, amount, date, timestamp, category, ref, account FROM expenses ORDER BY date DESC")
-      allExpenses = [ {"id": e[0], "concept": e[1], "amount": e[2], "date": e[3], "timestamp": e[4], "category": e[5], "ref": e[6], "account": e[7]} for e in cur.fetchall() ]
+      if 'fields' in request.args and request.args['fields'] == 'origin':
+        cur.execute('''
+        SELECT e.id, e.concept, e.amount, e.date, e.timestamp, e.category, e.account, eo.origin, eo.data
+          FROM expenses e
+            LEFT JOIN expense_origin eo ON (e.id = eo.expense_id AND eo.item_id IS NULL)
+          ORDER BY date DESC
+        ''')
+        allExpenses = [ {"id": e[0], "concept": e[1], "amount": e[2], "date": e[3], "timestamp": e[4], "category": e[5], "account": e[6], "origin": e[7], "originData": e[8]} for e in cur.fetchall() ]
+      else:
+        cur.execute("SELECT id, concept, amount, date, timestamp, category, account FROM expenses ORDER BY date DESC")
+        allExpenses = [ {"id": e[0], "concept": e[1], "amount": e[2], "date": e[3], "timestamp": e[4], "category": e[5], "account": e[6]} for e in cur.fetchall() ]
       
       return allExpenses, 200
 
