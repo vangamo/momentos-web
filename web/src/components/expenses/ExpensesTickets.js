@@ -10,32 +10,51 @@ function ExpensesTickets() {
 
   const { status: paperlessApiStatus, listDocuments } = useOutletContext();
 
-  useEffect(() => {
-    if (paperlessApiStatus) {
-      listDocuments()
+  const saveDocuments = (docData) => {
+    setDocuments((oldDocuments) => [
+      ...oldDocuments,
+      ...docData.results
+        .filter((doc) => !oldDocuments.find((prevDoc) => doc.id === prevDoc.id))
+        .filter((doc) => doc.document_type === 2 || doc.title.toLocaleLowerCase().includes('ticket') || doc.title.toLocaleLowerCase().includes('factura'))
+        .filter((doc) => !expenses.filter(d=>d.origin==='pplss.pweak.es').find((exp) => {
+          const originData = JSON.parse(exp.originData);
+          return doc.id === originData.id;
+        }))
+      ]);
+
+    const nextPage = docData.next && docData.next.match(/page=([0-9]+)/);
+    if( nextPage ) {
+      listDocuments(nextPage[1])
         .then((docData) => {
-          setDocuments([
-            ...documents,
-            ...docData.results
-              .filter((doc) => !documents.find((prevDoc) => doc.id === prevDoc.id))
-              .filter((doc) => doc.document_type === 2 || doc.title.toLocaleLowerCase().includes('ticket') || doc.title.toLocaleLowerCase().includes('factura'))
-              .filter((doc) => !expenses.filter(d=>d.origin==='pplss.pweak.es').find((exp) => {
-                const originData = JSON.parse(exp.originData);
-                return doc.id === originData.id;
-              }))
-            ]);
+          saveDocuments(docData);
         })
         .catch((error) => {
           console.log(error);
         });
     }
-  }, [listDocuments, paperlessApiStatus]);
+  }
+
+  useEffect(() => {
+    if (paperlessApiStatus) {
+      listDocuments()
+        .then((docData) => {
+          saveDocuments(docData);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  }, []);
 
   useEffect(() => {
     fetch(`${HOST_API}/api/expenses/?fields=origin`)
       .then((response) => response.json())
       .then((data) => {
         setExpenses(data);
+        setDocuments(documents.filter((doc) => !data.filter(d=>d.origin==='pplss.pweak.es').find((exp) => {
+          const originData = JSON.parse(exp.originData);
+          return doc.id === originData.id;
+        })))
       });
   }, []);
   
@@ -69,7 +88,15 @@ function ExpensesTickets() {
     <input type="text" name="" id="" placeholder="Cuenta" />
     </>
   };
+/*
+  const shownTickets = documents
+    .filter((doc) => !expenses.filter(d=>d.origin==='pplss.pweak.es').find((exp) => {
+      const originData = JSON.parse(exp.originData);
+      return doc.id === originData.id;
+    }));
 
+  console.log(documents.length, shownTickets.length);
+*/
   return (
     <section>
       Tickets!

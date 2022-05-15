@@ -16,10 +16,10 @@ function usePaperlessApi(config = { authToken: '', host: '' }) {
     });
   };
 
-  const listDocuments = () => {
+  const listDocuments = (page) => {
     console.log('pplssHook. Documents. Fetching');
     return API.getInstance(hostServer, authPaperless)
-      .getDocuments()
+      .getDocuments(page)
       .then((data) => {
         console.log(`pplssHook. Documents. Revived ${data.length}`);
         return data;
