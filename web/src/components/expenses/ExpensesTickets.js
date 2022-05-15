@@ -14,7 +14,6 @@ function ExpensesTickets() {
     if (paperlessApiStatus) {
       listDocuments()
         .then((docData) => {
-          console.log(docData);
           setDocuments([
             ...documents,
             ...docData.results
@@ -57,7 +56,6 @@ function ExpensesTickets() {
 
     const candidates = expenses.filter((e) => e.date.startsWith(ticketDate) && Math.abs(Math.abs(parseInt(ticketAmount))-Math.abs(parseInt(e.amount))) <= 10 );
     if( candidates.length ) {
-      console.dir({ticketTitle,ticketDate,ticketAmount,candidates})
       return <select>
         {candidates.map((c) => <option>{c.concept} - {c.date} - {c.amount}</option>)}
       </select>
