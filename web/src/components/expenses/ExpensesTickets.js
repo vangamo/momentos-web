@@ -223,12 +223,38 @@ function ExpensesTickets() {
     }
   }
 
+  const handleClickChangeTicket = () => {
+    const clickedId = expenseEdit.id;
+    const ticket = documents.find((doc) => doc.id === clickedId);
+
+    const parts = ticket.title.match(/(.*) ([0-9]{2,4})\.([0-9]{1,2})\.([0-9]{1,2}) +- +([0-9]+[.,]?[0-9]*)/);
+
+    const ticketTitle = parts[1];
+    const ticketAmount = parts[5].replace(',','.');
+
+    const newTitle = ticketTitle.replace('ticket', '').replace('Ticket', '').trim();
+    const newTitleCapitalized = newTitle.substring(0,1).toLocaleUpperCase() + newTitle.substring(1);
+
+    setExpenseEdit({
+      id: clickedId,
+      candidates: [],
+      ticket: {
+        concept: newTitleCapitalized,
+        amount: ticketAmount*-1,
+        date: `${parts[2]}.${parts[3]}.${parts[4]}`,
+        category: '',
+        account: ''
+      }
+    });
+  }
+
   const renderEditTicket = () => {
     if( expenseEdit.candidates.length ) {
       return <>
         <select onChange={handleChangeSelectEdit} value={expenseEdit.candidates.findIndex((c) => c.id === expenseEdit.ticket.id)}>
           {expenseEdit.candidates.map((c, idx) => <option key={idx} value={idx}>{c.concept} - {c.date} - {c.amount}</option>)}
         </select>
+        <button onClick={handleClickChangeTicket}>Editar</button>
         <button onClick={handleClickSavePair}>Guardar</button>
       </>;
     }
