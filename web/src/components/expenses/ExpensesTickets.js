@@ -53,11 +53,12 @@ function ExpensesTickets() {
   useEffect(() => {
     fetch(`${HOST_API}/api/expenses/?fields=origin`)
       .then((response) => response.json())
-      .then((data) => {
-        setExpenses(data);
-        setDocuments([...documents.filter((doc) => !data.filter(d=>d.origin===paperlessHost).find((exp) => {
+      .then((dataExpenses) => {
+        setExpenses(dataExpenses);
+        setDocuments((documents) => [...documents.filter((ticket) => !dataExpenses.filter(exp=>exp.origin===paperlessHost).find((exp) => {
           const originData = JSON.parse(exp.originData);
-          return doc.id === originData.id;
+          if( ticket.id===322 ) { console.log(originData.id); console.dir({ticket, originData}); }
+          return ticket.id === originData.id;
         }))])
       });
   }, []);
