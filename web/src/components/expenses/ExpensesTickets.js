@@ -10,6 +10,7 @@ function ExpensesTickets() {
   const [documents, setDocuments] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [expenseEdit, setExpenseEdit] = useState(DEFAULT_EXPENSE_EDIT);
+  const [categories, setCategories] = useState([]);
 
   const { status: paperlessApiStatus, listDocuments, config: {host: paperlessHost} } = useOutletContext();
 
@@ -63,6 +64,16 @@ function ExpensesTickets() {
       });
   }, []);
   
+  useEffect( () => {
+
+    fetch(`${HOST_API}/api/expenses/categories`)
+      .then( response => response.json() )
+      .then( data => {
+        setCategories(data.results.map(catObj => catObj.category));
+      });
+
+  }, []);
+
  const handleClickPair = (ev) => {
     const clickedId = parseInt(ev.target.dataset['id']);
     const ticket = documents.find((doc) => doc.id === clickedId);
@@ -263,7 +274,12 @@ function ExpensesTickets() {
         <input type="text" name="concept" id="concept" value={expenseEdit.ticket.concept} onChange={handleChangeInputEdit} />
         <input type="text" name="date" id="date" placeholder='Fecha' value={expenseEdit.ticket.date} onChange={handleChangeInputEdit} />
         <input type="text" name="amount" id="amount" placeholder="Importe" value={expenseEdit.ticket.amount} onChange={handleChangeInputEdit} />
-        <input type="text" name="category" id="category" placeholder="Cat" value={expenseEdit.ticket.category} onChange={handleChangeInputEdit} />
+        <input type="text" name="category" id="category" placeholder="Cat" list="categories_of_expenses" value={expenseEdit.ticket.category} onChange={handleChangeInputEdit} />
+        <datalist id="categories_of_expenses">
+          {categories.map((cat, idx) => 
+          <option key={idx} value={cat}/>
+          )}
+        </datalist>
         <input type="text" name="account" id="account" placeholder="Cuenta" value={expenseEdit.ticket.account} onChange={handleChangeInputEdit} />
         <button onClick={handleClickSavePair}>Guardar</button>
       </>;
