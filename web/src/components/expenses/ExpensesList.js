@@ -34,7 +34,14 @@ const isoToShort = (date) => {
     console.error(date);
     return '?';
   }
-  return `${dateValues[3]}${MONTHS[parseInt(dateValues[2], 10)]}`;
+
+  const currentYear = (new Date()).getFullYear();
+  if( parseInt(dateValues[1], 10) === currentYear ) {
+    return `${dateValues[3]}${MONTHS[parseInt(dateValues[2], 10)]}`;
+  }
+  else {
+    return `${dateValues[3]}${MONTHS[parseInt(dateValues[2], 10)]} - ${dateValues[1]}`;
+  }
 };
 
 const groupBy = (array, callback) => {
@@ -83,9 +90,8 @@ function ExpensesList(props) {
 
   return (
     <section>
-      No sé
-      <Table expenses={expenses} handleClickDeleteExpense={handleClickDeleteExpense}></Table>
       <Link to="add">Añadir</Link>
+      <Table expenses={expenses} handleClickDeleteExpense={handleClickDeleteExpense}></Table>
     </section>
   );
 }
