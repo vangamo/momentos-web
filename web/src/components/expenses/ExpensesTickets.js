@@ -11,24 +11,29 @@ function ExpensesTickets() {
   const [expenses, setExpenses] = useState([]);
   const [expenseEdit, setExpenseEdit] = useState(DEFAULT_EXPENSE_EDIT);
   const [categories, setCategories] = useState([]);
+  const [expensesStatus, setExpensesStatus] = useState('loading');
 
   const { status: paperlessApiStatus, listDocuments, config: {host: paperlessHost} } = useOutletContext();
 
   const saveDocuments = (docData) => {
+    const newDocuments = docData.results
+      .filter((doc) => doc.document_type === 2 || doc.title.toLocaleLowerCase().includes('ticket') || doc.title.toLocaleLowerCase().includes('factura'))
+      .filter((doc) => !expenses.filter(d=>d.origin===paperlessHost).find((exp) => {
+        const originData = JSON.parse(exp.originData);
+        //if( doc.id===322 ) { console.log(originData.id); console.dir({doc, originData}); }
+        return doc.id === originData.id;
+      }));
+
+    console.log(docData.next, newDocuments.length, expenses.length);
+
     setDocuments((oldDocuments) => [
       ...oldDocuments,
-      ...docData.results
+      ...newDocuments
         .filter((doc) => !oldDocuments.find((prevDoc) => doc.id === prevDoc.id))
-        .filter((doc) => doc.document_type === 2 || doc.title.toLocaleLowerCase().includes('ticket') || doc.title.toLocaleLowerCase().includes('factura'))
-        .filter((doc) => !expenses.filter(d=>d.origin===paperlessHost).find((exp) => {
-          const originData = JSON.parse(exp.originData);
-          if( doc.id===322 ) { console.log(originData.id); console.dir({doc, originData}); }
-          return doc.id === originData.id;
-        }))
       ]);
 
     const nextPage = docData.next && docData.next.match(/page=([0-9]+)/);
-    if( nextPage ) {
+    if( nextPage && (parseInt(nextPage[1]) < 3 || newDocuments.length > 0) ) {
       listDocuments(nextPage[1])
         .then((docData) => {
           saveDocuments(docData);
@@ -40,7 +45,7 @@ function ExpensesTickets() {
   }
 
   useEffect(() => {
-    if (paperlessApiStatus) {
+    if (paperlessApiStatus && expensesStatus === 'loaded') {
       listDocuments()
         .then((docData) => {
           saveDocuments(docData);
@@ -49,18 +54,14 @@ function ExpensesTickets() {
           console.log(error);
         });
     }
-  }, [paperlessApiStatus]);
+  }, [expensesStatus, paperlessApiStatus]);
 
   useEffect(() => {
     fetch(`${HOST_API}/api/expenses/?fields=origin`)
       .then((response) => response.json())
       .then((dataExpenses) => {
         setExpenses(dataExpenses);
-        setDocuments((documents) => [...documents.filter((ticket) => !dataExpenses.filter(exp=>exp.origin===paperlessHost).find((exp) => {
-          const originData = JSON.parse(exp.originData);
-          if( ticket.id===322 ) { console.log(originData.id); console.dir({ticket, originData}); }
-          return ticket.id === originData.id;
-        }))])
+        setExpensesStatus('loaded');
       });
   }, []);
   
@@ -156,7 +157,6 @@ function ExpensesTickets() {
     return fetch(`${HOST_API}/api/expense/${expenseEdit.ticket.id}/origin`, {method:'POST', headers:{'Content-Type': 'application/json'}, body: JSON.stringify(newPairData)})
     .then(response => response.json())
     .then( data => {
-      console.dir({expenseEdit, newPairData, ticketData});
       setExpenses(
         expenses.map((e) => {
           if( e.id === newPairData.expenseId ) {
@@ -286,16 +286,11 @@ function ExpensesTickets() {
     }
   }
 
-  const filteredTickets = documents.filter((doc) => !expenses.filter(d=>d.origin===paperlessHost).find((exp) => {
-    const originData = JSON.parse(exp.originData);
-    return doc.id === originData.id;
-  }))
-
   return (
     <section>
-      Tickets! (tenemos {filteredTickets.length} tickets y {expenses.length} gastos)
+      Tickets! (tenemos {documents.length} tickets y {expenses.length} gastos)
       <ul>
-        {filteredTickets.map((doc) => (
+        {documents.map((doc) => (
           <li key={doc.id}>
             <p>{doc.title}</p>
             <p>{expenseEdit.id === doc.id ? renderEditTicket(doc) : <button data-id={doc.id} onClick={handleClickPair}>Asociar</button>}</p>
