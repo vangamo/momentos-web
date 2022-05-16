@@ -244,11 +244,16 @@ function ExpensesTickets() {
     }
   }
 
+  const filteredTickets = documents.filter((doc) => !expenses.filter(d=>d.origin===paperlessHost).find((exp) => {
+    const originData = JSON.parse(exp.originData);
+    return doc.id === originData.id;
+  }))
+
   return (
     <section>
-      Tickets!
+      Tickets! (tenemos {filteredTickets.length} tickets y {expenses.length} gastos)
       <ul>
-        {documents.map((doc) => (
+        {filteredTickets.map((doc) => (
           <li key={doc.id}>
             <p>{doc.title}</p>
             <p>{expenseEdit.id === doc.id ? renderEditTicket(doc) : <button data-id={doc.id} onClick={handleClickPair}>Asociar</button>}</p>
