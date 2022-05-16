@@ -90,9 +90,8 @@ function ExpensesList(props) {
 
   return (
     <section>
-      No sé
-      <Table expenses={expenses} handleClickDeleteExpense={handleClickDeleteExpense}></Table>
       <Link to="add">Añadir</Link>
+      <Table expenses={expenses} handleClickDeleteExpense={handleClickDeleteExpense}></Table>
     </section>
   );
 }
