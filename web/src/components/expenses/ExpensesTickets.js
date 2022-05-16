@@ -18,10 +18,18 @@ function ExpensesTickets() {
   const saveDocuments = (docData) => {
     const newDocuments = docData.results
       .filter((doc) => doc.document_type === 2 || doc.title.toLocaleLowerCase().includes('ticket') || doc.title.toLocaleLowerCase().includes('factura'))
-      .filter((doc) => !expenses.filter(d=>d.origin===paperlessHost).find((exp) => {
+      .filter((doc) => !expenses
+                        .filter((exp) => exp.origins.some((o)=> o.origin===paperlessHost))
+                        .find((exp) => {
+                          return exp.origins.some((o) => {
+                            const originData = JSON.parse(o.originData);
+                            return doc.id === originData.id;
+                          });
+/*
         const originData = JSON.parse(exp.originData);
-        //if( doc.id===322 ) { console.log(originData.id); console.dir({doc, originData}); }
+        
         return doc.id === originData.id;
+*/
       }));
 
     console.log(docData.next, newDocuments.length, expenses.length);
@@ -33,7 +41,7 @@ function ExpensesTickets() {
       ]);
 
     const nextPage = docData.next && docData.next.match(/page=([0-9]+)/);
-    if( nextPage && (parseInt(nextPage[1]) < 3 || newDocuments.length > 0) ) {
+    if( nextPage && (parseInt(nextPage[1]) < 2 || newDocuments.length > 0) ) {
       listDocuments(nextPage[1])
         .then((docData) => {
           saveDocuments(docData);
@@ -160,8 +168,7 @@ function ExpensesTickets() {
       setExpenses(
         expenses.map((e) => {
           if( e.id === newPairData.expenseId ) {
-            e.origin = newPairData.origin;
-            e.originData = newPairData.data;
+            e.origins = [...e.origins, {origin: newPairData.origin, originData: newPairData.data } ];
           }
           return e;
         })
@@ -209,8 +216,7 @@ function ExpensesTickets() {
     return fetch(`${HOST_API}/api/expenses/`, {method:'POST', headers:{'Content-Type': 'application/json'}, body: JSON.stringify(expenseData)})
     .then(response => response.json())
     .then( data => {
-      data.origin = null;
-      data.originData = null;
+      data.origins = [];
       setExpenses([
         ...expenses,
         data
