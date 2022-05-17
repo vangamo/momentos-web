@@ -120,7 +120,15 @@ function Table(props) {
           {groups[date].map((exp, idx) => (
             <tr className="gastosTable__row" key={idx}>
               <td>{isoToHour(exp.date) === '00:00' ? '' : isoToHour(exp.date)}</td>
-              <td className="imp">{exp.concept}</td>
+              <td className="imp">
+                {exp.concept}
+                <span>
+                  {exp.itemCount && `Item x${exp.itemCount}`}
+                </span>
+                <span>
+                  {exp.originCount && `Origin x${exp.originCount}`}
+                </span>
+              </td>
               <td>{exp.amount}</td>
               <td className="imp">
                 <Link to={`edit/${exp.id}`}>

@@ -110,8 +110,15 @@ class Expense(Resource):
     
     else:
       cur = con.cursor()
-      cur.execute("SELECT id, concept, amount, date, timestamp, category, ref, account FROM expenses ORDER BY date DESC")
-      allExpenses = [ {"id": e[0], "concept": e[1], "amount": e[2], "date": e[3], "timestamp": e[4], "category": e[5], "ref": e[6], "account": e[7]} for e in cur.fetchall() ]
+      cur.execute('''
+SELECT e.id, e.concept, e.amount, e.date, e.timestamp, e.category, e.account, eo.count, ei.count
+FROM expenses e
+  LEFT JOIN (SELECT expense_id, COUNT(*) count FROM expense_origin WHERE item_id IS NULL GROUP BY expense_id) AS eo ON (e.id = eo.expense_id)
+  LEFT JOIN (SELECT expense_id, COUNT(*) count FROM expense_items GROUP BY expense_id) AS ei ON (e.id = ei.expense_id)
+ORDER BY e.date DESC
+''')
+        
+      allExpenses = [ {"id": e[0], "concept": e[1], "amount": e[2], "date": e[3], "timestamp": e[4], "category": e[5], "account": e[6], "originCount": e[7], "itemCount": e[8]} for e in cur.fetchall() ]
       
       return allExpenses, 200
 
