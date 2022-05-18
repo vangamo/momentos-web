@@ -8,6 +8,7 @@ import Dashboard from './Dashboard';
 import ExpensesAdd from './expenses/ExpensesAdd';
 import ExpensesList from './expenses/ExpensesList';
 import ExpensesEdit from './expenses/ExpensesEdit';
+import ExpenseItems from './expenses/ExpenseItems';
 
 const { NODE_ENV } = process.env;
 const HOST_API = 'production' === NODE_ENV ? '' : `${window.location.protocol}//${window.location.hostname}:5000`;
@@ -107,6 +108,7 @@ function App() {
             <Route path="add" element={<ExpensesAdd />} />
             <Route path="edit/:id" element={<ExpensesEdit />} />
             <Route path="tickets" element={<ExpensesTickets />} />
+            <Route path="detail/:id/items" element={<ExpenseItems />} />
           </Route>
         </Routes>
       </main>

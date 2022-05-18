@@ -102,9 +102,9 @@ class Expense(Resource):
     
     if id is not None:
       cur = con.cursor()
-      cur.execute("select id, concept, amount, date, timestamp, category, ref, account FROM expenses WHERE id=?", [id])
+      cur.execute("select id, concept, amount, date, timestamp, category, account, business FROM expenses WHERE id=?", [id])
       e = cur.fetchone()
-      expenseData = {"id": e[0], "concept": e[1], "amount": e[2], "date": e[3], "timestamp": e[4], "category": e[5], "ref": e[6], "account": e[7]}
+      expenseData = {"id": e[0], "concept": e[1], "amount": e[2], "date": e[3], "timestamp": e[4], "category": e[5], "account": e[6], "business": e[7]}
       
       return expenseData, 200
     
@@ -181,6 +181,103 @@ ORDER BY e.date DESC
       return {'result': 'wrong_rowcount_'+str(cur.rowcount)}, 500
 
 api.add_resource(Expense, "/api/expenses/", "/api/expense/", "/api/expense/<int:id>")
+
+class ExpenseItem(Resource):
+  def get(self, expenseId=None, itemId:int=None):
+    print(id)
+    con = sqlite3.connect('./data/moments.db')
+    cur = con.cursor()
+    cur.execute('''
+SELECT eo.id origin_id, eo.origin, eo.data,
+       ei.id item_id, ei.qty, ei.name, ei.brand, ei.amount
+FROM expense_origin eo
+  LEFT JOIN expense_items ei ON (eo.item_id = ei.id)
+WHERE eo.expense_id = ? AND eo.origin LIKE 'Ticket%'
+UNION ALL
+SELECT NULL origin_id, NULL origin, NULL data,
+       ei.id item_id, ei.qty, ei.name, ei.brand, ei.amount
+FROM expense_items ei
+WHERE ei.expense_id = ?
+ORDER BY eo.id, item_id;
+    ''', [expenseId, expenseId])
+    allTickets = [ {'itemOriginId': c[0], 'origin': c[1], 'data': c[2], 'itemId': c[3], 'qty': c[4], 'name': c[5], 'brand': c[6], 'amount': c[7]} for c in cur.fetchall() ]
+    print(allTickets)
+    return {'results': allTickets}, 200
+
+  def post(self, expenseId=None):
+    con = sqlite3.connect('./data/moments.db')
+    cur = con.cursor()
+
+    print(request.json)
+
+    newItem = {
+      'qty': request.json['qty'] if 'qty' in request.json and request.json['qty'] != '' else 1,
+      'name': request.json['name'],
+      'brand': request.json['brand'] if 'brand' in request.json and request.json['brand'] != '' else None,
+      'amount': request.json['amount'],
+      'expense_id': expenseId
+    }
+
+    cur.execute('''
+INSERT INTO expense_items (qty, name, brand, amount, expense_id)
+VALUES (:qty, :name, :brand, :amount, :expense_id)
+      ''', newItem )
+    newItem['id'] = cur.lastrowid
+
+    newItemOrigin = {
+      'data': request.json['data'],
+      'expense_id': expenseId,
+      'item_id': newItem['id']
+    }
+
+    cur.execute('''
+INSERT INTO expense_origin (origin, data, expense_id, item_id)
+VALUES ((SELECT 'Ticket ' || business FROM expenses WHERE id=:expense_id), :data, :expense_id, :item_id );
+      ''', newItemOrigin )
+    newItemOrigin['id'] = cur.lastrowid
+    newItemOrigin['origin'] = '???'
+
+    con.commit()
+    con.close()
+
+    result = {
+      'itemOriginId': newItemOrigin['id'],
+      'origin': newItemOrigin['origin'],
+      'data': newItemOrigin['data'], 
+      'itemId': newItem['id'],
+      'qty': newItem['qty'],
+      'name': newItem['name'],
+      'brand': newItem['brand'], 
+      'amount': newItem['amount']}
+
+    return {"status": "Ok", "result": result}, 200
+
+  def put(self, expenseId=None):
+    return {'status': 'Not implemented'}, 501
+  def delete(self, expenseId=None):
+    return {'status': 'Not implemented'}, 501
+
+api.add_resource(ExpenseItem, "/api/expense/<int:expenseId>/items", "/api/expense/<int:expenseId>/item", "/api/expense/<int:itemIid>/item/<int:itemId>")
+
+@app.route('/api/expenses/items', methods=['GET'])
+def get_expenses_items():
+  print(request.args['q'])
+  origin = 'Ticket ' + request.args['q']
+
+  con = sqlite3.connect('./data/moments.db')
+  cur = con.cursor()
+  cur.execute('''
+SELECT ei.name, ei.brand, ei.amount, MIN(eo.id) as id, eo.origin, eo.data, COUNT(*) count
+FROM expense_origin eo
+  LEFT JOIN expense_items ei ON (eo.item_id = ei.id)
+WHERE eo.origin = ?
+GROUP BY ei.name, ei.brand, ei.amount, eo.origin, eo.data
+ORDER BY count DESC, id;
+  ''', [origin])
+  allTicket = [ {"name": c[0], "brand": c[1], 'amount': c[2], 'id': c[3], 'origin': c[4], 'data': c[5], 'count': c[6]} for c in cur.fetchall() ]
+  
+  print(allTicket)
+  return {'results': allTicket}, 200
 
 @app.route('/api/expenses/categories', methods=['GET'])
 def get_expense_categories():

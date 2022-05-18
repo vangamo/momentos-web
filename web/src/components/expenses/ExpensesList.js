@@ -122,9 +122,11 @@ function Table(props) {
               <td>{isoToHour(exp.date) === '00:00' ? '' : isoToHour(exp.date)}</td>
               <td className="imp">
                 {exp.concept}
+                <Link to={`detail/${exp.id}/items`}>
                 <span>
                   {exp.itemCount && `Item x${exp.itemCount}`}
                 </span>
+                </Link>
                 <span>
                   {exp.originCount && `Origin x${exp.originCount}`}
                 </span>
