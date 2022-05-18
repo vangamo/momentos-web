@@ -169,33 +169,31 @@ function ExpenseItems(props) {
       ...newTicket,
       name: ticket.name,
       data: ticket.data,
-      amount: ticket.amount,
+      amount: ''+ticket.amount,
       brand: ticket.brand
     });
   };
 
   const handleClickAddNewItem = () => {
+    //console.log(newTicket);
     newTicket.amount = newTicket.amount.replace(',', '.');
 
-    
-    setItemList([
-      ...itemList,
-      newTicket
-    ]);
-
-    setTicketHistory((ticketHistory) => {
-      fetch(
-        `${HOST_API}/api/expense/${expenseId}/items`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(newTicket)
-        })
-        .then((response) => response.json())
-        .then((itemData) => {
-
+    fetch(
+      `${HOST_API}/api/expense/${expenseId}/items`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newTicket)
+      })
+      .then((response) => response.json())
+      .then((itemData) => {
+        setItemList([
+            ...itemList,
+            newTicket
+          ]);
+        setTicketHistory((ticketHistory) => {
           const found = ticketHistory.find((t)=>t.name === newTicket.name && t.data === newTicket.data);
           if(found) {
             return ticketHistory.map((t) => {
@@ -222,11 +220,12 @@ function ExpenseItems(props) {
             ];
           }
 
-        })
+        });
 
+      setNewTicket(DEFAULT_NEW_ITEM);
+      inputData.current.focus();
     });
-    setNewTicket(DEFAULT_NEW_ITEM);
-    inputData.current.focus();
+    
   };
 
   return (

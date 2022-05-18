@@ -192,14 +192,15 @@ SELECT eo.id origin_id, eo.origin, eo.data,
        ei.id item_id, ei.qty, ei.name, ei.brand, ei.amount
 FROM expense_origin eo
   LEFT JOIN expense_items ei ON (eo.item_id = ei.id)
-WHERE eo.expense_id = ? AND eo.origin LIKE 'Ticket%'
+WHERE eo.expense_id = :expense_id AND eo.origin LIKE 'Ticket%'
 UNION ALL
-SELECT NULL origin_id, NULL origin, NULL data,
+SELECT eo.id origin_id, eo.origin origin, eo.data data,
        ei.id item_id, ei.qty, ei.name, ei.brand, ei.amount
 FROM expense_items ei
-WHERE ei.expense_id = ?
-ORDER BY eo.id, item_id;
-    ''', [expenseId, expenseId])
+  LEFT JOIN expense_origin eo ON (ei.id = eo.item_id)
+WHERE eo.id IS NULL AND ei.expense_id = :expense_id
+ORDER BY origin_id, item_id;
+    ''', {'expense_id': expenseId} )
     allTickets = [ {'itemOriginId': c[0], 'origin': c[1], 'data': c[2], 'itemId': c[3], 'qty': c[4], 'name': c[5], 'brand': c[6], 'amount': c[7]} for c in cur.fetchall() ]
     print(allTickets)
     return {'results': allTickets}, 200
