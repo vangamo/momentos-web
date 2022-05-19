@@ -25,8 +25,8 @@ class Api {
     this.__authToken__ = authToken;
   }
 
-  getDocuments() {
-    return fetch(`https://${this.host}/api/documents/`, {
+  getDocuments(page) {
+    return fetch(`https://${this.host}/api/documents/?${page ? `page=${page}` : ''}`, {
       method: 'GET',
       headers: { Authorization: `Token ${this.__authToken__}` },
     }).then((response) => response.json());

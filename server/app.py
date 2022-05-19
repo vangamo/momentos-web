@@ -96,6 +96,18 @@ class Moment(Resource):
 
 api.add_resource(Moment, "/api/moments/", "/api/moment/", "/api/moment/<int:id>")
 
+@app.route('/api/expense/<int:id>/origin', methods=['POST'])
+def post_expense_origin(id=0):
+  con = sqlite3.connect('./data/moments.db')
+  cur = con.cursor()
+
+  cur.execute(' ''INSERT INTO expense_origin (origin, data, expense_id) VALUES (:origin, :data, :expenseId)' '', request.json )
+  request.json['id'] = cur.lastrowid
+  con.commit()
+  con.close()
+
+  return request.json, 200
+
 class Expense(Resource):
   def get(self, id:int=None):
     con = sqlite3.connect('./data/moments.db')
@@ -109,16 +121,37 @@ class Expense(Resource):
       return expenseData, 200
     
     else:
+      print( request.args )
       cur = con.cursor()
-      cur.execute('''
+
+      if 'fields' in request.args and request.args['fields'] == 'origin':
+        cur.execute('''
+SELECT e.id, e.concept, e.amount, e.date, e.timestamp, e.category, e.account, eo.origin, eo.data
+FROM expenses e
+  LEFT JOIN expense_origin eo ON (e.id = eo.expense_id AND eo.item_id IS NULL)
+ORDER BY date DESC
+        ''')
+        
+        allExpenses = []
+        lastId = 0
+        for e in cur.fetchall():
+          if e[0] == lastId:
+            allExpenses[-1]['origins'].append({'origin': e[7], 'originData': e[8]})
+          else:
+            allExpenses.append({ "id": e[0], "concept": e[1], "amount": e[2], "date": e[3], "timestamp": e[4], "category": e[5], "account": e[6], 'origins': [] })
+            if e[7] is not None:
+              allExpenses[-1]['origins'].append({'origin': e[7], 'originData': e[8]})
+            lastId = e[0]
+      else:
+        cur.execute('''
 SELECT e.id, e.concept, e.amount, e.date, e.timestamp, e.category, e.account, eo.count, ei.count
 FROM expenses e
   LEFT JOIN (SELECT expense_id, COUNT(*) count FROM expense_origin WHERE item_id IS NULL GROUP BY expense_id) AS eo ON (e.id = eo.expense_id)
   LEFT JOIN (SELECT expense_id, COUNT(*) count FROM expense_items GROUP BY expense_id) AS ei ON (e.id = ei.expense_id)
 ORDER BY e.date DESC
-''')
+        ''')
         
-      allExpenses = [ {"id": e[0], "concept": e[1], "amount": e[2], "date": e[3], "timestamp": e[4], "category": e[5], "account": e[6], "originCount": e[7], "itemCount": e[8]} for e in cur.fetchall() ]
+        allExpenses = [ {"id": e[0], "concept": e[1], "amount": e[2], "date": e[3], "timestamp": e[4], "category": e[5], "account": e[6], "originCount": e[7], "itemCount": e[8]} for e in cur.fetchall() ]
       
       return allExpenses, 200
 
