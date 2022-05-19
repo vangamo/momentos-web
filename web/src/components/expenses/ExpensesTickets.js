@@ -16,20 +16,27 @@ function ExpensesTickets() {
   const { status: paperlessApiStatus, listDocuments, config: {host: paperlessHost} } = useOutletContext();
 
   const saveDocuments = (docData) => {
+    console.log( docData.results
+      .filter((doc) => doc.document_type === 2 || doc.title.toLocaleLowerCase().includes('ticket') || doc.title.toLocaleLowerCase().includes('factura')) );
+
     const newDocuments = docData.results
       .filter((doc) => doc.document_type === 2 || doc.title.toLocaleLowerCase().includes('ticket') || doc.title.toLocaleLowerCase().includes('factura'))
       .filter((doc) => !expenses
-                        .filter((exp) => exp.origins.some((o)=> o.origin===paperlessHost))
+                        .map((exp) => ({
+                          ...exp,
+                          origin: exp.origins.find((o) => o.origin===paperlessHost)
+                        }))
+                        .filter((exp) => exp.origin !== undefined)
                         .find((exp) => {
-                          return exp.origins.some((o) => {
-                            const originData = JSON.parse(o.originData);
+
+                          try {
+                            const originData = JSON.parse(exp.origin.originData);
                             return doc.id === originData.id;
-                          });
-/*
-        const originData = JSON.parse(exp.originData);
-        
-        return doc.id === originData.id;
-*/
+                          }
+                          catch(e) {
+                            return false;
+                          }
+
       }));
 
     console.log(docData.next, newDocuments.length, expenses.length);
